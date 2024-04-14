@@ -1,0 +1,8 @@
+set(TEST_SOURCES test_ldi.cpp test_ldr.cpp test_add.cpp test_stack.cpp test_ldm.cpp)
+
+add_executable(${PROJECT_NAME}_test ${TEST_SOURCES})
+target_link_libraries(${PROJECT_NAME}_test fmt::fmt GTest::gtest_main)
+
+enable_testing()
+include(GoogleTest)
+gtest_discover_tests(${PROJECT_NAME}_test)
