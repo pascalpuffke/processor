@@ -7,8 +7,8 @@ TEST(Processor, LoadRegister) {
     processor.write_register(0, 0);
     processor.write_register(7, expected);
 
-    auto ins = Processor::encode_instruction(
-        Processor::InstructionType::LoadFromReg,
+    auto ins = encode_instruction(
+        InstructionType::LoadFromReg,
         Register { 0 },
         Register { 7 }
     );
@@ -26,8 +26,8 @@ TEST(Processor, LoadRegisterFlags) {
         processor.write_register(0, 0);
         processor.write_register(7, expected);
 
-        auto ins = Processor::encode_instruction(
-            Processor::InstructionType::LoadFromReg,
+        auto ins = encode_instruction(
+            InstructionType::LoadFromReg,
             Register { 0 },
             Register { 7 }
         );
@@ -46,8 +46,8 @@ TEST(Processor, LoadRegisterFlags) {
         processor.write_register(0, 0);
         processor.write_register(7, 0);
 
-        auto ins = Processor::encode_instruction(
-            Processor::InstructionType::LoadFromReg,
+        auto ins = encode_instruction(
+            InstructionType::LoadFromReg,
             Register { 0 },
             Register { 7 }
         );

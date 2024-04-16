@@ -14,8 +14,8 @@ TEST(Processor, Store) {
     processor.write_register(high_byte_reg, target_addr);
     processor.write_register(data_reg, target_data);
 
-    auto ins = Processor::encode_instruction(
-        Processor::InstructionType::Store,
+    auto ins = encode_instruction(
+        InstructionType::Store,
         Register { low_byte_reg },
         Register { high_byte_reg },
         Register { data_reg }

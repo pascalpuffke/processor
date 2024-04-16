@@ -17,8 +17,8 @@ TEST(Processor, LoadFromMemory) {
     processor.write_register(low, target_addr >> 8);
     processor.write_register(high, target_addr);
 
-    auto ins = processor.encode_instruction(
-        Processor::InstructionType::LoadFromMem,
+    auto ins = encode_instruction(
+        InstructionType::LoadFromMem,
         dst,
         low,
         high

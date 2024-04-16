@@ -8,14 +8,14 @@ TEST(Processor, Stack) {
 
     processor.write_register(0, 100);
 
-    auto ins1 = Processor::encode_instruction(Processor::InstructionType::Push, Register { 0 });
+    auto ins1 = encode_instruction(InstructionType::Push, Register { 0 });
     processor.write_instruction(processor.reset_pc, ins1);
 
     EXPECT_TRUE(processor.execute(1));
     EXPECT_EQ(processor.stack_pointer(), 1);
     EXPECT_EQ(processor.read_memory(0), 100);
 
-    auto ins2 = Processor::encode_instruction(Processor::InstructionType::Pop, Register { 1 });
+    auto ins2 = encode_instruction(InstructionType::Pop, Register { 1 });
     processor.write_instruction(processor.reset_pc + 2, ins2);
 
     EXPECT_TRUE(processor.execute(1));
@@ -28,7 +28,7 @@ TEST(Processor, StackUnderflow) {
 
     EXPECT_EQ(processor.stack_pointer(), 0);
 
-    auto ins = Processor::encode_instruction(Processor::InstructionType::Pop, Register { 0 });
+    auto ins = encode_instruction(InstructionType::Pop, Register { 0 });
     processor.write_instruction(processor.reset_pc, ins);
 
     EXPECT_FALSE(processor.execute(1));
@@ -41,7 +41,7 @@ TEST(Processor, StackOverflow) {
     EXPECT_EQ(processor.stack_pointer(), 0);
 
     // fill memory with push instructions and let it burn down
-    auto ins = Processor::encode_instruction(Processor::InstructionType::Push, Register { 0 });
+    auto ins = encode_instruction(InstructionType::Push, Register { 0 });
     for (int i = 0; i < ((0xFFFF - processor.stack_size()) / 2); i++) {
         processor.write_instruction(processor.reset_pc + i, ins);
     }

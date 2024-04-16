@@ -5,8 +5,8 @@ TEST(Processor, LoadImmediate) {
     auto run = [](u8 reg, u8 num) {
         auto processor = Processor {};
 
-        auto ins = Processor::encode_instruction(
-            Processor::InstructionType::LoadFromImm,
+        auto ins = encode_instruction(
+            InstructionType::LoadFromImm,
             Register { reg },
             Immediate { num }
         );
@@ -26,8 +26,8 @@ TEST(Processor, LoadImmediate) {
 TEST(Processor, LoadImmediateFlags) {
     auto processor = Processor {};
 
-    auto ins1 = Processor::encode_instruction(
-        Processor::InstructionType::LoadFromImm,
+    auto ins1 = encode_instruction(
+        InstructionType::LoadFromImm,
         Register { 1 },
         Immediate { 0 }
     );
@@ -37,8 +37,8 @@ TEST(Processor, LoadImmediateFlags) {
     EXPECT_TRUE(processor.is_flag_set(Processor::Flag::Zero));
     EXPECT_FALSE(processor.is_flag_set(Processor::Flag::Negative));
 
-    auto ins2 = Processor::encode_instruction(
-        Processor::InstructionType::LoadFromImm,
+    auto ins2 = encode_instruction(
+        InstructionType::LoadFromImm,
         Register { 1 },
         Immediate { 0b1000'0000 }
     );
@@ -52,8 +52,8 @@ TEST(Processor, LoadImmediateFlags) {
 TEST(Processor, LoadIntoInvalidRegister) {
     auto processor = Processor {};
 
-    auto ins = Processor::encode_instruction(
-        Processor::InstructionType::LoadFromImm,
+    auto ins = encode_instruction(
+        InstructionType::LoadFromImm,
         Register { 10 },
         Immediate { 1 }
     );

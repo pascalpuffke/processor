@@ -1,4 +1,3 @@
-#include <fmt/format.h>
 #include <gtest/gtest.h>
 #include <processor.hpp>
 
@@ -7,8 +6,8 @@ TEST(Processor, Add) {
     processor.write_register(2, 1);
     processor.write_register(3, 2);
 
-    auto ins = Processor::encode_instruction(
-        Processor::InstructionType::Add,
+    auto ins = encode_instruction(
+        InstructionType::Add,
         Register { 1 },
         Register { 2 },
         Register { 3 }
@@ -22,8 +21,8 @@ TEST(Processor, Add) {
 TEST(Processor, AddFlags) {
     auto processor = Processor {};
 
-    auto ins1 = Processor::encode_instruction(
-        Processor::InstructionType::Add,
+    auto ins1 = encode_instruction(
+        InstructionType::Add,
         Register { 1 },
         Register { 2 },
         Register { 3 }
@@ -37,8 +36,8 @@ TEST(Processor, AddFlags) {
     processor.write_register(2, 128);
     processor.write_register(3, 129);
 
-    auto ins2 = Processor::encode_instruction(
-        Processor::InstructionType::Add,
+    auto ins2 = encode_instruction(
+        InstructionType::Add,
         Register { 1 },
         Register { 2 },
         Register { 3 }
@@ -53,8 +52,8 @@ TEST(Processor, AddFlags) {
     processor.write_register(2, 128);
     processor.write_register(3, 2);
 
-    auto ins3 = Processor::encode_instruction(
-        Processor::InstructionType::Add,
+    auto ins3 = encode_instruction(
+        InstructionType::Add,
         Register { 1 },
         Register { 2 },
         Register { 3 }
