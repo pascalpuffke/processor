@@ -14,6 +14,8 @@ A made up CPU architecture and emulator
 
 - Enough to count down from 10 to 0
 
+- Bare bones assembler
+
 - That's basically it.
 
 ## Details
@@ -63,7 +65,6 @@ Instruction encoding:
 // or
 // type' reg'8bit data
 // tttt'..r1'dddd'dddd
-// reg fields need to be 2-bits
 ```
 
 ## Does this have any practical use?
@@ -105,7 +106,5 @@ For that reason, there may be similarities to the 6502, but it's still a complet
 
   `st r1, r2, #42`
 
-- There is no assembler; programs are hand-assembled, further adding
-  to the register allocation mess. (This is why it expanded to 8.)
 - There is no disassembler or other debugging tools.
 - Testing is minimal and obvious bugs remain.
