@@ -1,0 +1,6 @@
+BasedOnStyle: WebKit
+IndentWidth: 4
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: false
+AlignAfterOpenBracket: BlockIndent
