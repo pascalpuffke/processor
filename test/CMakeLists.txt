@@ -1,12 +1,17 @@
 set(TEST_SOURCES
-	test_add.cpp
-	test_ldi.cpp
-	test_ldm.cpp
-	test_ldr.cpp
-	test_stack.cpp
-	test_store.cpp)
+        test_add.cpp
+        test_assembler.cpp
+        test_ldi.cpp
+        test_ldm.cpp
+        test_ldr.cpp
+        test_stack.cpp
+        test_store.cpp)
 
-add_executable(${PROJECT_NAME}_test ${TEST_SOURCES})
+set(TEST_DEPENDENCIES
+        ../src/assembler.cpp
+)
+
+add_executable(${PROJECT_NAME}_test ${TEST_SOURCES} ${TEST_DEPENDENCIES})
 target_link_libraries(${PROJECT_NAME}_test fmt::fmt GTest::gtest_main)
 
 enable_testing()

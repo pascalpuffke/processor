@@ -69,8 +69,10 @@ auto parse_register(std::string_view token) -> std::optional<Register> {
 
 // '#123' '#0x7B' -> 123
 auto parse_immediate(std::string_view token) -> std::optional<Immediate> {
-    if (!token.starts_with('#'))
+    if (!token.starts_with('#')) {
+        fmt::println("immediate needs to start with a '#' character");
         return std::nullopt;
+    }
 
     const auto is_hex = token.starts_with("#0x");
     // Subtract 1 from the substr length for the leading # and another one if
@@ -89,10 +91,16 @@ auto parse_immediate(std::string_view token) -> std::optional<Immediate> {
         immediate = std::stoi(substr.data(), nullptr, 10);
     }
 
-    if (immediate < std::numeric_limits<Immediate::imm_t>::min())
+    static constexpr auto min = std::numeric_limits<Immediate::imm_t>::min();
+    static constexpr auto max = std::numeric_limits<Immediate::imm_t>::max();
+    if (immediate < min) {
+        fmt::println("immediate is too small (min {})", min);
         return std::nullopt;
-    if (immediate > std::numeric_limits<Immediate::imm_t>::max())
+    }
+    if (immediate > max) {
+        fmt::println("immediate is too big (max {})", max);
         return std::nullopt;
+    }
 
     return Immediate { static_cast<Immediate::imm_t>(immediate) };
 }
@@ -121,16 +129,18 @@ auto Assembler::assemble(const std::string& source) -> std::vector<insr_t> {
 
         auto mnemonic_it = instruction_map.find(tokens[0]);
         if (mnemonic_it == instruction_map.end()) {
-            fmt::println("illegal instruction");
-            continue;
+            fmt::println("illegal instruction (unknown mnemonic)");
+            return {};
         }
 
         // extremely unhelpful, please improve error handling sometime
-#define MUST_PARSE(fn) ({                                       \
-    auto __result = fn;                                         \
-    if (!__result.has_value())                                  \
-        assert(false && "error parsing register or immediate"); \
-    __result.value();                                           \
+#define MUST_PARSE(fn) ({                                    \
+    auto __result = fn;                                      \
+    if (!__result.has_value()) {                             \
+        fmt::println("error parsing register or immediate"); \
+        return {};                                           \
+    }                                                        \
+    __result.value();                                        \
 })
 
         const auto type = mnemonic_it->second.type;
@@ -164,7 +174,8 @@ auto Assembler::assemble(const std::string& source) -> std::vector<insr_t> {
             break;
         }
         default:
-            fmt::println("illegal instruction");
+            fmt::println("illegal instruction (too many arguments)");
+            return {};
         }
     }
 #undef MUST_PARSE
