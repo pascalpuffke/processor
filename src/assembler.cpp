@@ -4,7 +4,6 @@
 #include <fmt/std.h>
 #include <optional>
 #include <sstream>
-#include <string>
 #include <unordered_map>
 
 auto split(const std::string& str, char delimiter) -> std::vector<std::string> {
@@ -68,16 +67,27 @@ auto parse_register(std::string_view token) -> std::optional<Register> {
     return Register { static_cast<Register::reg_t>(register_index) };
 }
 
-// '#123' and '#123,' -> 123
+// '#123' '#0x7B' -> 123
 auto parse_immediate(std::string_view token) -> std::optional<Immediate> {
     if (!token.starts_with('#'))
         return std::nullopt;
 
+    const auto is_hex = token.starts_with("#0x");
     // Subtract 1 from the substr length for the leading # and another one if
     // the token ends with a comma
-    const auto subtract = 1 + (token.ends_with(',') ? 1 : 0);
-    const auto substr = token.substr(1, token.length() - subtract);
-    const auto immediate = std::stoi(substr.data());
+    auto subtract = 1 + (token.ends_with(',') ? 1 : 0);
+
+    auto immediate = 0;
+    if (is_hex) {
+        // get rid of the 0x prefix
+        subtract += 2;
+
+        const auto substr = token.substr(3, token.length() - subtract);
+        immediate = std::stoi(substr.data(), nullptr, 16);
+    } else {
+        const auto substr = token.substr(1, token.length() - subtract);
+        immediate = std::stoi(substr.data(), nullptr, 10);
+    }
 
     if (immediate < std::numeric_limits<Immediate::imm_t>::min())
         return std::nullopt;

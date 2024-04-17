@@ -5,11 +5,11 @@ auto main(int, char**) -> int {
     auto processor = Processor {};
 
     const auto source = std::string { R"(
-        ldi r0 #10
+        ldi r0, #10
         ldi r1, #1
-        ldi r7, #255
-        ldi r3, #16
-        ldi r5, #10
+        ldi r7, #0xFF
+        ldi r3, #0x10
+        ldi r5, #0x0A
         sub r0, r0, r1
         jz r7, r3
         jp r7, r5
