@@ -132,7 +132,7 @@ public:
     }
 
     constexpr auto dump_memory(int width = 8) const noexcept {
-        for (auto x = 0; x < m_memory.size(); x += width) {
+        for (usize x = 0; x < m_memory.size(); x += width) {
             fmt::print("0x{:X}: ", x);
             for (auto xx = 0; xx < width; xx++) {
                 auto byte = m_memory[x + xx];
@@ -288,7 +288,7 @@ public:
             auto& dst = m_registers[r1];
             auto& low_reg = m_registers[r2];
             auto& high_reg = m_registers[r3];
-            addr_t address = (low_reg << 8) | high_reg;
+            addr_t address = static_cast<addr_t>((low_reg << 8) | high_reg);
 
             dst = read_memory(address);
 
@@ -307,7 +307,7 @@ public:
             auto& low_reg = m_registers[r1];
             auto& high_reg = m_registers[r2];
             auto& src = m_registers[r3];
-            addr_t address = (low_reg << 8) | high_reg;
+            addr_t address = static_cast<addr_t>((low_reg << 8) | high_reg);
 
             write_memory(address, src);
 
@@ -411,7 +411,7 @@ public:
 
             auto& low_reg = m_registers[r1];
             auto& high_reg = m_registers[r2];
-            addr_t address = (low_reg << 8) | high_reg;
+            addr_t address = static_cast<addr_t>((low_reg << 8) | high_reg);
 
             // I don't like the -2 here.
             m_program_counter = address - 2;
@@ -426,7 +426,7 @@ public:
 
             auto& low_reg = m_registers[r1];
             auto& high_reg = m_registers[r2];
-            addr_t address = (low_reg << 8) | high_reg;
+            addr_t address = static_cast<addr_t>((low_reg << 8) | high_reg);
 
             // Neither do I like it here.
             if (is_flag_set(Flag::Zero))

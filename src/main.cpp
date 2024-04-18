@@ -17,10 +17,10 @@ auto main(int, char**) -> int {
     )" };
     const auto code = Assembler::assemble(source);
 
-    constexpr auto start = Processor::reset_pc;
-    for (auto i = 0; i < code.size(); i++) {
-        const auto instruction = code[i];
-        const auto location = start + (i * 2);
+    constexpr Processor::addr_t start = Processor::reset_pc;
+    for (usize i = 0; i < code.size(); i++) {
+        const insr_t instruction = code[i];
+        const Processor::addr_t location = start + (i * 2);
         processor.write_instruction(location, instruction);
     }
 
