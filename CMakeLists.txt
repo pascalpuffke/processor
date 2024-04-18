@@ -27,4 +27,9 @@ target_compile_options(
     -fdiagnostics-color=always
 )
 
-add_subdirectory(test)
+# For some reason, building on Mac (with default AppleClang compiler) causes a seemingly infinite loop of
+# the compiler/linker doing nothing useful other than keeping all cores loaded and eating up every byte of memory
+# at the "linking gmock" phase
+if (NOT APPLE)
+    add_subdirectory(test)
+endif ()

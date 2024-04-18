@@ -8,7 +8,11 @@ include(${CPM_DOWNLOAD_LOCATION})
 
 CPMAddPackage(NAME fmt VERSION 10.0.0 GITHUB_REPOSITORY fmtlib/fmt GIT_TAG 10.0.0)
 CPMAddPackage(NAME cxxopts VERSION 3.2.0 GITHUB_REPOSITORY jarro2783/cxxopts GIT_TAG v3.2.0)
-CPMAddPackage(NAME googletest VERSION 1.14.0 GITHUB_REPOSITORY google/googletest GIT_TAG v1.14.0)
+
+# See note in the root CMakeLists.txt file
+if (NOT APPLE)
+    CPMAddPackage(NAME googletest VERSION 1.14.0 GITHUB_REPOSITORY google/googletest GIT_TAG v1.14.0)
+endif ()
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/_deps/cxxopts-src/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/_deps/fmt-src/include)
