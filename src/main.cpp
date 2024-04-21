@@ -1,4 +1,5 @@
 #include <assembler.hpp>
+#include <disassembler.hpp>
 #include <processor.hpp>
 
 auto main(int, char**) -> int {
@@ -16,6 +17,8 @@ auto main(int, char**) -> int {
         done
     )" };
     const auto code = Assembler::assemble(source);
+    const auto disasm = Disassembler::disassemble(std::span { code });
+    fmt::println("{}", disasm);
 
     constexpr Processor::addr_t start = Processor::reset_pc;
     for (usize i = 0; i < code.size(); i++) {

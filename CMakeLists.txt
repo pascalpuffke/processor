@@ -13,6 +13,7 @@ include(cmake/packages.cmake)
 set(SOURCES
     src/main.cpp
     src/assembler.cpp
+    src/disassembler.cpp
 )
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
