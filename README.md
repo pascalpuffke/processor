@@ -106,5 +106,5 @@ For that reason, there may be similarities to the 6502, but it's still a complet
 
   `st r1, r2, #42`
 
-- There is no disassembler or other debugging tools.
+- No debugging tools.
 - Testing is minimal and obvious bugs remain.
