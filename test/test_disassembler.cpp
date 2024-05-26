@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 
 TEST(Disassembler, DiassembleValidProgram) {
-    const auto code = std::vector<insr_t> {
+    const auto code = std::vector<ProcessorSpec::insr_t> {
         (std::to_underlying(InstructionType::Add) << 12) | 0 << 8 | 1 << 4 | 2,
         (std::to_underlying(InstructionType::And) << 12) | 1 << 8 | 2 << 4 | 3,
         (std::to_underlying(InstructionType::Div) << 12) | 2 << 8 | 3 << 4 | 4,

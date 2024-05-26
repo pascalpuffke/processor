@@ -12,7 +12,7 @@ TEST(Processor, Add) {
         Register { 2 },
         Register { 3 }
     );
-    processor.write_instruction(processor.reset_pc, ins);
+    processor.write_instruction(ProcessorSpec::reset_pc, ins);
 
     EXPECT_TRUE(processor.execute(1));
     EXPECT_EQ(processor.registers()[1], 3);
@@ -27,7 +27,7 @@ TEST(Processor, AddFlags) {
         Register { 2 },
         Register { 3 }
     );
-    processor.write_instruction(processor.reset_pc, ins1);
+    processor.write_instruction(ProcessorSpec::reset_pc, ins1);
 
     EXPECT_TRUE(processor.execute(1));
     EXPECT_EQ(processor.registers()[1], 0);
@@ -42,7 +42,7 @@ TEST(Processor, AddFlags) {
         Register { 2 },
         Register { 3 }
     );
-    processor.write_instruction(processor.reset_pc + 2, ins1);
+    processor.write_instruction(ProcessorSpec::reset_pc + 2, ins1);
 
     EXPECT_TRUE(processor.execute(1));
     EXPECT_EQ(processor.registers()[1], 1);
@@ -58,7 +58,7 @@ TEST(Processor, AddFlags) {
         Register { 2 },
         Register { 3 }
     );
-    processor.write_instruction(processor.reset_pc + 4, ins1);
+    processor.write_instruction(ProcessorSpec::reset_pc + 4, ins1);
 
     EXPECT_TRUE(processor.execute(1));
     EXPECT_EQ(processor.registers()[1], 130);

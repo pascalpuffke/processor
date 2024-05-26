@@ -20,10 +20,10 @@ auto main(int, char**) -> int {
     const auto disasm = Disassembler::disassemble(std::span { code });
     fmt::println("{}", disasm);
 
-    constexpr Processor::addr_t start = Processor::reset_pc;
+    constexpr auto start = ProcessorSpec::reset_pc;
     for (usize i = 0; i < code.size(); i++) {
         const insr_t instruction = code[i];
-        const Processor::addr_t location = start + (i * 2);
+        const addr_t location = start + (i * 2);
         processor.write_instruction(location, instruction);
     }
 

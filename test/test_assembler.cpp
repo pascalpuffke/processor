@@ -27,7 +27,7 @@ TEST(Assembler, AssembleValidProgram) {
 
     EXPECT_EQ(code.size(), expected_size);
 
-    auto expected_code = std::vector<insr_t> {
+    auto expected_code = std::vector<ProcessorSpec::insr_t> {
         (std::to_underlying(InstructionType::Add) << 12) | 0 << 8 | 1 << 4 | 2,
         (std::to_underlying(InstructionType::And) << 12) | 1 << 8 | 2 << 4 | 3,
         (std::to_underlying(InstructionType::Div) << 12) | 2 << 8 | 3 << 4 | 4,

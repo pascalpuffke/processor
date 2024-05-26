@@ -23,7 +23,7 @@ TEST(Processor, LoadFromMemory) {
         low,
         high
     );
-    processor.write_instruction(processor.reset_pc, ins);
+    processor.write_instruction(ProcessorSpec::reset_pc, ins);
 
     EXPECT_TRUE(processor.execute(1));
 

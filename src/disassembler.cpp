@@ -2,7 +2,14 @@
 
 #include <array>
 
-static constexpr std::array<std::string, 16> instruction_to_string = {
+// Clang doesnt seem to like constexpr std::array
+#ifdef __clang__
+#define ARRAY_CONSTEXPR
+#else
+#define ARRAY_CONSTEXPR constexpr
+#endif
+
+static ARRAY_CONSTEXPR std::array<std::string, 16> instruction_to_string = {
     "ldr",
     "st",
     "add",
@@ -21,22 +28,22 @@ static constexpr std::array<std::string, 16> instruction_to_string = {
     "done",
 };
 
-static constexpr std::array<InstructionType, 1> no_reg_instructions = {
+static ARRAY_CONSTEXPR std::array<InstructionType, 1> no_reg_instructions = {
     InstructionType::Done
 };
 
-static constexpr std::array<InstructionType, 2> single_reg_instructions = {
+static ARRAY_CONSTEXPR std::array<InstructionType, 2> single_reg_instructions = {
     InstructionType::Push,
     InstructionType::Pop
 };
 
-static constexpr std::array<InstructionType, 3> double_reg_instructions = {
+static ARRAY_CONSTEXPR std::array<InstructionType, 3> double_reg_instructions = {
     InstructionType::Jump,
     InstructionType::JumpIfZero,
     InstructionType::LoadFromReg
 };
 
-static constexpr std::array<InstructionType, 9> triple_reg_instructions = {
+static ARRAY_CONSTEXPR std::array<InstructionType, 9> triple_reg_instructions = {
     InstructionType::Add,
     InstructionType::And,
     InstructionType::Div,
@@ -48,7 +55,7 @@ static constexpr std::array<InstructionType, 9> triple_reg_instructions = {
     InstructionType::Xor,
 };
 
-static constexpr std::array<InstructionType, 1> regimm_instructions = {
+static ARRAY_CONSTEXPR std::array<InstructionType, 1> regimm_instructions = {
     InstructionType::LoadFromImm
 };
 
@@ -61,7 +68,7 @@ bool array_contains(const std::array<T, N>& arr, const T& value) {
     return false;
 }
 
-auto Disassembler::disassemble(std::span<const insr_t> code) -> std::vector<std::string> {
+auto Disassembler::disassemble(std::span<const ProcessorSpec::insr_t> code) -> std::vector<std::string> {
     if (code.empty())
         return {};
 

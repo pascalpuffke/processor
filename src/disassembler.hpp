@@ -8,5 +8,5 @@
 
 class Disassembler final {
 public:
-    [[nodiscard]] static auto disassemble(std::span<const insr_t> code) -> std::vector<std::string>;
+    [[nodiscard]] static auto disassemble(std::span<const ProcessorSpec::insr_t> code) -> std::vector<std::string>;
 };

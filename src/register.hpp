@@ -1,20 +1,19 @@
 #pragma once
 
-#include <types.hpp>
+#include <spec.hpp>
 #include <fmt/core.h>
 
 struct Register {
-    using reg_t = u8;
-    reg_t reg { 0 };
-    constexpr explicit Register(reg_t r)
+    ProcessorSpec::reg_t reg { 0 };
+    constexpr explicit Register(ProcessorSpec::reg_t r)
         : reg(r) {
     }
-    constexpr operator reg_t() const { return reg; }
+    constexpr operator ProcessorSpec::reg_t() const { return reg; }
 };
 
 template <>
-struct fmt::formatter<Register> : formatter<u8> {
+struct fmt::formatter<Register> : formatter<ProcessorSpec::reg_t> {
     auto format(Register r, format_context& ctx) const {
-        return formatter<u8>::format(r.reg, ctx);
+        return formatter<ProcessorSpec::reg_t>::format(r.reg, ctx);
     }
 };

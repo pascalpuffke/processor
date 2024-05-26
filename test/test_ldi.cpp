@@ -10,7 +10,7 @@ TEST(Processor, LoadImmediate) {
             Register { reg },
             Immediate { num }
         );
-        processor.write_instruction(processor.reset_pc, ins);
+        processor.write_instruction(ProcessorSpec::reset_pc, ins);
 
         EXPECT_TRUE(processor.execute(1));
 
@@ -31,7 +31,7 @@ TEST(Processor, LoadImmediateFlags) {
         Register { 1 },
         Immediate { 0 }
     );
-    processor.write_instruction(processor.reset_pc, ins1);
+    processor.write_instruction(ProcessorSpec::reset_pc, ins1);
 
     EXPECT_TRUE(processor.execute(1));
     EXPECT_TRUE(processor.is_flag_set(Processor::Flag::Zero));
@@ -42,7 +42,7 @@ TEST(Processor, LoadImmediateFlags) {
         Register { 1 },
         Immediate { 0b1000'0000 }
     );
-    processor.write_instruction(processor.reset_pc + 2, ins2);
+    processor.write_instruction(ProcessorSpec::reset_pc + 2, ins2);
 
     EXPECT_TRUE(processor.execute(1));
     EXPECT_FALSE(processor.is_flag_set(Processor::Flag::Zero));
@@ -57,7 +57,7 @@ TEST(Processor, LoadIntoInvalidRegister) {
         Register { 10 },
         Immediate { 1 }
     );
-    processor.write_instruction(processor.reset_pc, ins);
+    processor.write_instruction(ProcessorSpec::reset_pc, ins);
 
     EXPECT_FALSE(processor.execute(1));
 }

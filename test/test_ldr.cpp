@@ -12,7 +12,7 @@ TEST(Processor, LoadRegister) {
         Register { 0 },
         Register { 7 }
     );
-    processor.write_instruction(processor.reset_pc, ins);
+    processor.write_instruction(ProcessorSpec::reset_pc, ins);
 
     EXPECT_TRUE(processor.execute(1));
     u8 actual = processor.registers()[0];
@@ -31,7 +31,7 @@ TEST(Processor, LoadRegisterFlags) {
             Register { 0 },
             Register { 7 }
         );
-        processor.write_instruction(processor.reset_pc, ins);
+        processor.write_instruction(ProcessorSpec::reset_pc, ins);
 
         EXPECT_TRUE(processor.execute(1));
         u8 actual = processor.registers()[0];
@@ -51,7 +51,7 @@ TEST(Processor, LoadRegisterFlags) {
             Register { 0 },
             Register { 7 }
         );
-        processor.write_instruction(processor.reset_pc, ins);
+        processor.write_instruction(ProcessorSpec::reset_pc, ins);
 
         EXPECT_TRUE(processor.execute(1));
         u8 actual = processor.registers()[0];

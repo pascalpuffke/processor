@@ -27,6 +27,13 @@
  * done                     set 'kill' bit and stop execution
  */
 
+// Leak all of those out to whoever includes this file, I don't care anymore
+using ProcessorSpec::reg_t;
+using ProcessorSpec::imm_t;
+using ProcessorSpec::data_t;
+using ProcessorSpec::insr_t;
+using ProcessorSpec::addr_t;
+
 class Processor {
 public:
     enum class Flag : u8 {
@@ -36,22 +43,11 @@ public:
         Negative = 0b1000,
     };
 
-    using data_t = u8;
-    using reg_t = u8;
-    using imm_t = u8;
-    using addr_t = u16;
-
-    static constexpr auto highest_addr = std::numeric_limits<addr_t>::max();
-    static constexpr auto register_count = 8;
-    // Where to look for the address to start execution from (addr_t reset_pc | reset_pc + 1)
-    static constexpr addr_t reset_pc = 0xFF00;
-
-    constexpr auto reset(addr_t new_pc = reset_pc) {
+    constexpr auto reset(addr_t new_pc = ProcessorSpec::reset_pc) {
         m_memory.fill(0);
         m_registers = { 0 };
         m_program_counter = new_pc;
-        m_stack_pointer = 0;
-        m_stack_size = 0xFF;
+        m_stack_pointer = ProcessorSpec::stack_top_addr;
         m_flags = 0;
     }
 
@@ -82,10 +78,6 @@ public:
 
     [[nodiscard]] constexpr auto stack_pointer() const noexcept {
         return m_stack_pointer;
-    }
-
-    [[nodiscard]] constexpr auto stack_size() const noexcept {
-        return m_stack_size;
     }
 
     [[nodiscard]] constexpr auto flags() const noexcept {
@@ -181,35 +173,35 @@ public:
                 return false;
             }
 
-            const auto instruction = read_instruction(m_program_counter);
-            const auto decoded_instruction = decode_instruction(instruction);
-            const auto executed = execute_instruction(decoded_instruction);
+            const auto instruction = fetch_instruction(m_program_counter);
+            const auto decoded = decode_instruction(instruction);
+            const auto executed = execute_instruction(decoded);
 
             if (!executed) {
                 fmt::println("instruction @ pc=0x{:X} failed to execute", m_program_counter);
                 fmt::println(
                     "type={} r1={} r2={} r3={} data={}",
-                    std::to_underlying(decoded_instruction.type),
-                    decoded_instruction.r1,
-                    decoded_instruction.r2,
-                    decoded_instruction.r3,
-                    decoded_instruction.data
+                    std::to_underlying(decoded.type),
+                    decoded.r1,
+                    decoded.r2,
+                    decoded.r3,
+                    decoded.data
                 );
                 return false;
             }
 
-            m_program_counter += sizeof(insr_t);
+            m_program_counter += sizeof(ProcessorSpec::insr_t);
         }
 
         return true;
     }
 
     constexpr auto write_register(u8 reg, data_t data) {
-        if (reg < register_count)
+        if (reg < ProcessorSpec::register_count)
             m_registers[reg] = data;
     }
 
-    constexpr auto read_instruction(addr_t addr) -> insr_t {
+    constexpr auto fetch_instruction(addr_t addr) -> insr_t {
         static_assert(sizeof(insr_t) == 2);
 
         const auto first_byte = read_memory(addr);
@@ -253,9 +245,9 @@ public:
         case InstructionType::LoadFromReg: {
             fmt::println("ldr r{}, r{}", r1, r2);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
             auto& src = m_registers[r2];
@@ -267,7 +259,7 @@ public:
         case InstructionType::LoadFromImm: {
             fmt::println("ldi r{}, #{}", r1, instruction.data);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
 
@@ -278,11 +270,11 @@ public:
         case InstructionType::LoadFromMem: {
             fmt::println("ldm r{}, r{}, r{}", r1, r2, r3);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
-            if (r3 >= register_count)
+            if (r3 >= ProcessorSpec::register_count)
                 return false;
 
             auto& dst = m_registers[r1];
@@ -297,11 +289,11 @@ public:
         case InstructionType::Store: {
             fmt::println("st r{}, r{}, r{}", r1, r2, r3);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
-            if (r3 >= register_count)
+            if (r3 >= ProcessorSpec::register_count)
                 return false;
 
             auto& low_reg = m_registers[r1];
@@ -316,11 +308,11 @@ public:
         case InstructionType::Add: {
             fmt::println("add r{}, r{}, r{}", r1, r2, r3);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
-            if (r3 >= register_count)
+            if (r3 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
             auto& lhs = m_registers[r2];
@@ -338,11 +330,11 @@ public:
         case InstructionType::Sub: {
             fmt::println("sub r{}, r{}, r{}", r1, r2, r3);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
-            if (r3 >= register_count)
+            if (r3 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
             auto& lhs = m_registers[r2];
@@ -360,11 +352,11 @@ public:
         case InstructionType::Mul: {
             fmt::println("mul r{}, r{}, r{}", r1, r2, r3);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
-            if (r3 >= register_count)
+            if (r3 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
             auto& lhs = m_registers[r2];
@@ -382,11 +374,11 @@ public:
         case InstructionType::Div: {
             fmt::println("div r{}, r{}, r{}", r1, r2, r3);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
-            if (r3 >= register_count)
+            if (r3 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
             auto& lhs = m_registers[r2];
@@ -404,9 +396,9 @@ public:
         case InstructionType::Jump: {
             fmt::println("jp r{}, r{}", r1, r2);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
 
             auto& low_reg = m_registers[r1];
@@ -419,9 +411,9 @@ public:
         case InstructionType::JumpIfZero: {
             fmt::println("jz r{}, r{}", r1, r2);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
 
             auto& low_reg = m_registers[r1];
@@ -435,11 +427,11 @@ public:
         case InstructionType::And: {
             fmt::println("and r{}, r{}, r{}", r1, r2, r3);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
-            if (r3 >= register_count)
+            if (r3 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
             auto& lhs = m_registers[r2];
@@ -452,11 +444,11 @@ public:
         case InstructionType::Or: {
             fmt::println("or r{}, r{}, r{}", r1, r2, r3);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
-            if (r3 >= register_count)
+            if (r3 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
             auto& lhs = m_registers[r2];
@@ -469,11 +461,11 @@ public:
         case InstructionType::Xor: {
             fmt::println("xor r{}, r{}, r{}", r1, r2, r3);
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
-            if (r2 >= register_count)
+            if (r2 >= ProcessorSpec::register_count)
                 return false;
-            if (r3 >= register_count)
+            if (r3 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
             auto& lhs = m_registers[r2];
@@ -486,32 +478,32 @@ public:
         case InstructionType::Push: {
             fmt::println("push r{}", r1);
 
-            if (m_stack_pointer >= m_stack_size) {
+            if (m_stack_pointer <= ProcessorSpec::stack_top_addr - ProcessorSpec::stack_size) {
                 fmt::println("stack overflow");
                 return false;
             }
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
             auto& src = m_registers[r1];
 
+            m_stack_pointer -= sizeof(data_t);
             m_memory[m_stack_pointer] = src;
-            m_stack_pointer += sizeof(data_t);
         } break;
         case InstructionType::Pop: {
             fmt::println("pop r{}", r1);
 
-            if (m_stack_pointer == 0) {
+            if (m_stack_pointer >= ProcessorSpec::stack_top_addr) {
                 fmt::println("stack underflow (tried popping empty stack)");
                 return false;
             }
 
-            if (r1 >= register_count)
+            if (r1 >= ProcessorSpec::register_count)
                 return false;
             auto& dst = m_registers[r1];
 
-            dst = m_memory[m_stack_pointer - 1];
-            m_stack_pointer -= sizeof(data_t);
+            dst = m_memory[m_stack_pointer];
+            m_stack_pointer += sizeof(data_t);
         } break;
         case InstructionType::Done: {
             m_should_kill_itself = true;
@@ -524,12 +516,11 @@ public:
     }
 
 private:
-    std::array<data_t, highest_addr> m_memory { 0 };
-    std::array<reg_t, register_count> m_registers { 0 };
+    std::array<u8, ProcessorSpec::highest_addr> m_memory { 0 };
+    std::array<reg_t, ProcessorSpec::register_count> m_registers { 0 };
 
     addr_t m_program_counter { 0 };
-    addr_t m_stack_pointer { 0 };
-    addr_t m_stack_size { 0xFF };
+    addr_t m_stack_pointer { ProcessorSpec::stack_top_addr };
     u8 m_flags { 0 };
 
     bool m_should_kill_itself { false };

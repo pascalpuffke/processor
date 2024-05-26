@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#include <types.hpp>
+#include <spec.hpp>
 #include <register.hpp>
 #include <immediate.hpp>
 
@@ -27,29 +27,27 @@ enum class InstructionType : u8 {
 };
 // clang-format on
 
-using insr_t = u16;
-
 // type|0000|0000|0000
-static constexpr auto encode_instruction(InstructionType type) -> insr_t {
-    return static_cast<insr_t>(std::to_underlying(type) << 12);
+static constexpr auto encode_instruction(InstructionType type) -> ProcessorSpec::insr_t {
+    return static_cast<ProcessorSpec::insr_t>(std::to_underlying(type) << 12);
 }
 
 // type|00R1|0000|0000
-static constexpr auto encode_instruction(InstructionType type, Register r1) -> insr_t {
-    return static_cast<insr_t>(std::to_underlying(type) << 12 | r1 << 8);
+static constexpr auto encode_instruction(InstructionType type, Register r1) -> ProcessorSpec::insr_t {
+    return static_cast<ProcessorSpec::insr_t>(std::to_underlying(type) << 12 | r1 << 8);
 }
 
 // type|00R1|00R2|0000
-static constexpr auto encode_instruction(InstructionType type, Register r1, Register r2) -> insr_t {
-    return static_cast<insr_t>(std::to_underlying(type) << 12 | r1 << 8 | r2 << 4);
+static constexpr auto encode_instruction(InstructionType type, Register r1, Register r2) -> ProcessorSpec::insr_t {
+    return static_cast<ProcessorSpec::insr_t>(std::to_underlying(type) << 12 | r1 << 8 | r2 << 4);
 }
 
 // type|00R1|00R2|00R3
-static constexpr auto encode_instruction(InstructionType type, Register r1, Register r2, Register r3) -> insr_t {
-    return static_cast<insr_t>(std::to_underlying(type) << 12 | r1 << 8 | r2 << 4 | (r3 & 0xF));
+static constexpr auto encode_instruction(InstructionType type, Register r1, Register r2, Register r3) -> ProcessorSpec::insr_t {
+    return static_cast<ProcessorSpec::insr_t>(std::to_underlying(type) << 12 | r1 << 8 | r2 << 4 | (r3 & 0xF));
 }
 
 // type|00R1|immm|immm
-static constexpr auto encode_instruction(InstructionType type, Register r1, Immediate imm) -> insr_t {
-    return static_cast<insr_t>(std::to_underlying(type) << 12 | r1 << 8 | imm);
+static constexpr auto encode_instruction(InstructionType type, Register r1, Immediate imm) -> ProcessorSpec::insr_t {
+    return static_cast<ProcessorSpec::insr_t>(std::to_underlying(type) << 12 | r1 << 8 | imm);
 }

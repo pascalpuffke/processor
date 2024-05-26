@@ -22,11 +22,9 @@ static_assert(sizeof(i16) == 2);
 static_assert(sizeof(i32) == 4);
 static_assert(sizeof(i64) == 8);
 
-// dunno how I feel about these
 using f32 = float;
 using f64 = double;
 
-// if you're not on 64-bit yet, too bad.
 static_assert(sizeof(std::size_t) == 8);
 using usize = std::size_t;
 static_assert(sizeof(std::ptrdiff_t) == 8);
