@@ -1,6 +1,7 @@
 #pragma once
 
 #include <types.hpp>
+#include <limits>
 
 namespace ProcessorSpec {
     using reg_t = u8;
