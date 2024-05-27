@@ -64,8 +64,8 @@ public:
     }
 
     constexpr auto write_instruction(addr_t start_address, insr_t encoded_instruction) {
-        write_memory(start_address, (encoded_instruction >> 8) & 0xFF);
-        write_memory(start_address + 1, encoded_instruction & 0xFF);
+        write_memory(start_address, static_cast<data_t>((encoded_instruction >> 8) & 0xFF));
+        write_memory(start_address + 1, static_cast<data_t>(encoded_instruction & 0xFF));
     }
 
     [[nodiscard]] constexpr auto registers() const noexcept {
@@ -123,10 +123,10 @@ public:
         return string;
     }
 
-    constexpr auto dump_memory(int width = 8) const noexcept {
+    constexpr auto dump_memory(usize width = 8) const noexcept {
         for (usize x = 0; x < m_memory.size(); x += width) {
             fmt::print("0x{:X}: ", x);
-            for (auto xx = 0; xx < width; xx++) {
+            for (usize xx = 0; xx < width; xx++) {
                 auto byte = m_memory[x + xx];
                 fmt::print("{:X} ", byte);
             }
@@ -487,7 +487,7 @@ public:
                 return false;
             auto& src = m_registers[r1];
 
-            m_stack_pointer -= sizeof(data_t);
+            m_stack_pointer -= static_cast<addr_t>(sizeof(data_t));
             m_memory[m_stack_pointer] = src;
         } break;
         case InstructionType::Pop: {

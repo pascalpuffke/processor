@@ -23,7 +23,7 @@ auto main(int, char**) -> int {
     constexpr auto start = ProcessorSpec::reset_pc;
     for (usize i = 0; i < code.size(); i++) {
         const insr_t instruction = code[i];
-        const addr_t location = start + (i * 2);
+        const addr_t location = static_cast<addr_t>(start + (i * 2));
         processor.write_instruction(location, instruction);
     }
 

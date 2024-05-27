@@ -9,7 +9,7 @@
 #define ARRAY_CONSTEXPR constexpr
 #endif
 
-static ARRAY_CONSTEXPR std::array<std::string, 16> instruction_to_string = {
+static ARRAY_CONSTEXPR std::array instruction_to_string = {
     "ldr",
     "st",
     "add",
@@ -28,22 +28,22 @@ static ARRAY_CONSTEXPR std::array<std::string, 16> instruction_to_string = {
     "done",
 };
 
-static ARRAY_CONSTEXPR std::array<InstructionType, 1> no_reg_instructions = {
+static ARRAY_CONSTEXPR std::array no_reg_instructions = {
     InstructionType::Done
 };
 
-static ARRAY_CONSTEXPR std::array<InstructionType, 2> single_reg_instructions = {
+static ARRAY_CONSTEXPR std::array single_reg_instructions = {
     InstructionType::Push,
     InstructionType::Pop
 };
 
-static ARRAY_CONSTEXPR std::array<InstructionType, 3> double_reg_instructions = {
+static ARRAY_CONSTEXPR std::array double_reg_instructions = {
     InstructionType::Jump,
     InstructionType::JumpIfZero,
     InstructionType::LoadFromReg
 };
 
-static ARRAY_CONSTEXPR std::array<InstructionType, 9> triple_reg_instructions = {
+static ARRAY_CONSTEXPR std::array triple_reg_instructions = {
     InstructionType::Add,
     InstructionType::And,
     InstructionType::Div,
@@ -55,7 +55,7 @@ static ARRAY_CONSTEXPR std::array<InstructionType, 9> triple_reg_instructions = 
     InstructionType::Xor,
 };
 
-static ARRAY_CONSTEXPR std::array<InstructionType, 1> regimm_instructions = {
+static ARRAY_CONSTEXPR std::array regimm_instructions = {
     InstructionType::LoadFromImm
 };
 

@@ -16,4 +16,6 @@ namespace ProcessorSpec {
     static constexpr ProcessorSpec::addr_t stack_top_addr = 0x00FF;
     static constexpr ProcessorSpec::addr_t highest_addr = std::numeric_limits<addr_t>::max();
     static constexpr ProcessorSpec::addr_t reset_pc = 0xFF00;
+
+    static_assert(stack_top_addr - stack_size >= 0);
 };
