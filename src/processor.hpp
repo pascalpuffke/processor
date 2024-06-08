@@ -43,10 +43,10 @@ public:
         Negative = 0b1000,
     };
 
-    constexpr auto reset(addr_t new_pc = ProcessorSpec::reset_pc) {
+    constexpr auto reset() {
         m_memory.fill(0);
         m_registers = { 0 };
-        m_program_counter = new_pc;
+        m_program_counter = ProcessorSpec::reset_pc;
         m_stack_pointer = ProcessorSpec::stack_top_addr;
         m_flags = 0;
     }
@@ -278,9 +278,9 @@ public:
                 return false;
 
             auto& dst = m_registers[r1];
-            auto& low_reg = m_registers[r2];
-            auto& high_reg = m_registers[r3];
-            addr_t address = static_cast<addr_t>((low_reg << 8) | high_reg);
+            auto& high_reg = m_registers[r2];
+            auto& low_reg = m_registers[r3];
+            addr_t address = static_cast<addr_t>((high_reg << 8) | low_reg);
 
             dst = read_memory(address);
 
@@ -296,10 +296,10 @@ public:
             if (r3 >= ProcessorSpec::register_count)
                 return false;
 
-            auto& low_reg = m_registers[r1];
-            auto& high_reg = m_registers[r2];
+            auto& high_reg = m_registers[r1];
+            auto& low_reg = m_registers[r2];
             auto& src = m_registers[r3];
-            addr_t address = static_cast<addr_t>((low_reg << 8) | high_reg);
+            addr_t address = static_cast<addr_t>((high_reg << 8) | low_reg);
 
             write_memory(address, src);
 

@@ -42,8 +42,8 @@ TEST(Processor, StackOverflow) {
 
     // fill memory with push instructions and let it burn down
     auto ins = encode_instruction(InstructionType::Push, Register { 0 });
-    for (int i = 0; i < ((0xFFFF - ProcessorSpec::stack_size) / 2); i++) {
-        processor.write_instruction(ProcessorSpec::reset_pc + i, ins);
+    for (int i = 0; i < 0xFFFF; i += 2) {
+        processor.write_instruction(i, ins);
     }
 
     EXPECT_FALSE(processor.execute());
