@@ -401,12 +401,13 @@ public:
             if (r2 >= ProcessorSpec::register_count)
                 return false;
 
-            auto& low_reg = m_registers[r1];
-            auto& high_reg = m_registers[r2];
-            addr_t address = static_cast<addr_t>((low_reg << 8) | high_reg);
+            auto& high_reg = m_registers[r1];
+            auto& low_reg = m_registers[r2];
+            addr_t address = static_cast<addr_t>((high_reg << 8) | low_reg);
 
-            // I don't like the -2 here.
-            m_program_counter = address - 2;
+	    // Point to the previous instruction, so execution begins at the
+	    // correct address
+            m_program_counter = address - sizeof(insr_t);
         } break;
         case InstructionType::JumpIfZero: {
             fmt::println("jz r{}, r{}", r1, r2);
@@ -416,13 +417,12 @@ public:
             if (r2 >= ProcessorSpec::register_count)
                 return false;
 
-            auto& low_reg = m_registers[r1];
-            auto& high_reg = m_registers[r2];
-            addr_t address = static_cast<addr_t>((low_reg << 8) | high_reg);
+            auto& high_reg = m_registers[r1];
+            auto& low_reg = m_registers[r2];
+            addr_t address = static_cast<addr_t>((high_reg << 8) | low_reg);
 
-            // Neither do I like it here.
             if (is_flag_set(Flag::Zero))
-                m_program_counter = address - 2;
+                m_program_counter = address - sizeof(insr_t);
         } break;
         case InstructionType::And: {
             fmt::println("and r{}, r{}, r{}", r1, r2, r3);
