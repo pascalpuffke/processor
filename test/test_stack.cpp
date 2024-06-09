@@ -36,15 +36,20 @@ TEST(Processor, StackUnderflow) {
 }
 
 TEST(Processor, StackOverflow) {
-    auto processor = Processor {};
+    EXPECT_EQ(ProcessorSpec::reset_pc, 0xFF00);
 
+    auto processor = Processor {};
     EXPECT_EQ(processor.stack_pointer(), ProcessorSpec::stack_top_addr);
 
-    // fill memory with push instructions and let it burn down
-    auto ins = encode_instruction(InstructionType::Push, Register { 0 });
-    for (int i = 0; i < 0xFFFF; i += 2) {
-        processor.write_instruction(i, ins);
-    }
+    auto load_upper = encode_instruction(InstructionType::LoadFromImm, Register { 0 }, Immediate { 0xFF });
+    auto load_lower = encode_instruction(InstructionType::LoadFromImm, Register { 1 }, Immediate { 0x04 });
+    auto push = encode_instruction(InstructionType::Push, Register { 0 });
+    auto jump = encode_instruction(InstructionType::Jump, Register { 0 }, Register { 1 });
+
+    processor.write_instruction(ProcessorSpec::reset_pc, load_upper);
+    processor.write_instruction(ProcessorSpec::reset_pc + 2, load_lower);
+    processor.write_instruction(ProcessorSpec::reset_pc + 4, push);
+    processor.write_instruction(ProcessorSpec::reset_pc + 6, jump);
 
     EXPECT_FALSE(processor.execute());
 }
