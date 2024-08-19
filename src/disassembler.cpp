@@ -1,8 +1,9 @@
 #include <disassembler.hpp>
 
+#include <algorithm>
 #include <array>
 
-// Clang doesnt seem to like constexpr std::array
+// Clang doesn't seem to like constexpr std::array
 #ifdef __clang__
 #define ARRAY_CONSTEXPR
 #else
@@ -59,13 +60,14 @@ static ARRAY_CONSTEXPR std::array regimm_instructions = {
     InstructionType::LoadFromImm
 };
 
-template<typename T, std::size_t N>
-bool array_contains(const std::array<T, N>& arr, const T& value) {
-    for (const auto& it : arr) {
-        if (it == value)
-            return true;
-    }
-    return false;
+template <std::ranges::input_range R, typename T>
+bool range_contains(const R& range, const T& value) {
+    return std::ranges::any_of(
+        range,
+        [&](const auto& it) {
+            return it == value;
+        }
+    );
 }
 
 auto Disassembler::disassemble(std::span<const ProcessorSpec::insr_t> code) -> std::vector<std::string> {
@@ -77,25 +79,25 @@ auto Disassembler::disassemble(std::span<const ProcessorSpec::insr_t> code) -> s
         const u8 mnemonic = static_cast<u8>((instruction >> 12) & 0xF);
         const auto& mnemonic_string = instruction_to_string[mnemonic];
 
-        if (array_contains(no_reg_instructions, static_cast<InstructionType>(mnemonic))) {
-            result.push_back(mnemonic_string);
+        if (range_contains(no_reg_instructions, static_cast<InstructionType>(mnemonic))) {
+            result.emplace_back(mnemonic_string);
             continue;
         }
 
-        if (array_contains(single_reg_instructions, static_cast<InstructionType>(mnemonic))) {
+        if (range_contains(single_reg_instructions, static_cast<InstructionType>(mnemonic))) {
             const auto r1 = (instruction >> 8) & 0xF;
             result.emplace_back(fmt::format("{} r{}", mnemonic_string, r1));
             continue;
         }
 
-        if (array_contains(double_reg_instructions, static_cast<InstructionType>(mnemonic))) {
+        if (range_contains(double_reg_instructions, static_cast<InstructionType>(mnemonic))) {
             const auto r1 = (instruction >> 8) & 0xF;
             const auto r2 = (instruction >> 4) & 0xF;
             result.emplace_back(fmt::format("{} r{}, r{}", mnemonic_string, r1, r2));
             continue;
         }
 
-        if (array_contains(triple_reg_instructions, static_cast<InstructionType>(mnemonic))) {
+        if (range_contains(triple_reg_instructions, static_cast<InstructionType>(mnemonic))) {
             const auto r1 = (instruction >> 8) & 0xF;
             const auto r2 = (instruction >> 4) & 0xF;
             const auto r3 = (instruction >> 0) & 0xF;
@@ -103,7 +105,7 @@ auto Disassembler::disassemble(std::span<const ProcessorSpec::insr_t> code) -> s
             continue;
         }
 
-        if (array_contains(regimm_instructions, static_cast<InstructionType>(mnemonic))) {
+        if (range_contains(regimm_instructions, static_cast<InstructionType>(mnemonic))) {
             const auto r1 = (instruction >> 8) & 0xF;
             const auto imm = instruction & 0xFF;
             result.emplace_back(fmt::format("{} r{}, #{}", mnemonic_string, r1, imm));
