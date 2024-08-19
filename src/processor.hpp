@@ -84,7 +84,7 @@ public:
         return m_flags;
     }
 
-    constexpr auto is_flag_set(Flag flag) const noexcept -> bool {
+    [[nodiscard]] constexpr auto is_flag_set(Flag flag) const noexcept -> bool {
         return m_flags & std::to_underlying(flag);
     }
 
@@ -96,7 +96,7 @@ public:
         m_flags &= ~std::to_underlying(flag);
     }
 
-    constexpr auto flag_string() const -> std::string {
+    [[nodiscard]] constexpr auto flag_string() const -> std::string {
         auto string = std::string {};
         string.append("....");
 
@@ -125,10 +125,10 @@ public:
 
     constexpr auto dump_memory(usize width = 8) const noexcept {
         for (usize x = 0; x < m_memory.size(); x += width) {
-            fmt::print("0x{:X}: ", x);
+            fmt::print("{:4X}: ", x);
             for (usize xx = 0; xx < width; xx++) {
                 auto byte = m_memory[x + xx];
-                fmt::print("{:X} ", byte);
+                fmt::print("{:2X} ", byte);
             }
             fmt::print("\n");
         }
@@ -136,7 +136,7 @@ public:
 
     constexpr auto dump_state(bool with_memory = false) const noexcept {
         if (with_memory) {
-            fmt::println("memory={}", m_memory);
+            dump_memory(48);
         } else {
             fmt::println("memory=<size 0x{:X} bytes>", m_memory.size());
         }
@@ -201,12 +201,12 @@ public:
             m_registers[reg] = data;
     }
 
-    constexpr auto fetch_instruction(addr_t addr) -> insr_t {
+    [[nodiscard]] constexpr auto fetch_instruction(addr_t addr) const -> insr_t {
         static_assert(sizeof(insr_t) == 2);
 
         const auto first_byte = read_memory(addr);
         const auto second_byte = read_memory(addr + 1);
-        const insr_t instruction = (first_byte << 8) | second_byte;
+        const auto instruction = static_cast<insr_t const>((first_byte << 8) | second_byte);
         return instruction;
     }
 
@@ -403,7 +403,7 @@ public:
 
             auto& high_reg = m_registers[r1];
             auto& low_reg = m_registers[r2];
-            addr_t address = static_cast<addr_t>((high_reg << 8) | low_reg);
+            auto address = static_cast<addr_t>((high_reg << 8) | low_reg);
 
 	    // Point to the previous instruction, so execution begins at the
 	    // correct address
@@ -419,7 +419,7 @@ public:
 
             auto& high_reg = m_registers[r1];
             auto& low_reg = m_registers[r2];
-            addr_t address = static_cast<addr_t>((high_reg << 8) | low_reg);
+            auto address = static_cast<addr_t>((high_reg << 8) | low_reg);
 
             if (is_flag_set(Flag::Zero))
                 m_program_counter = address - sizeof(insr_t);
