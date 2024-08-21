@@ -46,3 +46,40 @@ TEST(Disassembler, DiassembleValidProgram) {
     EXPECT_TRUE(!result.empty());
     EXPECT_EQ(expected_result, result);
 }
+
+TEST(Disassembler, InvalidRegister) {
+    std::vector<ProcessorSpec::insr_t> code = {
+        encode_instruction(InstructionType::Add, Register { 3 }, Register { 9 }, Register { 10 }) // r2 and r3 are out of bounds
+    };
+
+    testing::internal::CaptureStderr();
+    auto result = Disassembler::disassemble(code);
+    std::string output = testing::internal::GetCapturedStderr();
+
+    EXPECT_EQ(result.size(), 0);
+    EXPECT_NE(output.find("addresses an invalid register"), std::string::npos);
+}
+
+TEST(Disassembler, UnexpectedRegisterUsage) {
+    std::vector<ProcessorSpec::insr_t> code = {
+        encode_instruction(InstructionType::Done) | 0xFFF
+    };
+
+    testing::internal::CaptureStderr();
+    auto result = Disassembler::disassemble(code);
+    std::string output = testing::internal::GetCapturedStderr();
+
+    EXPECT_EQ(result.size(), 0);
+    EXPECT_NE(output.find("expected no registers, potentially corrupt!"), std::string::npos);
+}
+
+TEST(Disassembler, IllegalInstruction) {
+    const auto code = std::vector<ProcessorSpec::insr_t> {
+        0b0001'1111'1111'1111,
+        0b0010'1111'0000'0101,
+        0b1111'1111'1111'1111
+    };
+    const auto result = Disassembler::disassemble(std::span { code });
+
+    EXPECT_TRUE(result.empty());
+}

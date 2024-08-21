@@ -1,6 +1,5 @@
 #include <disassembler.hpp>
 
-#include <algorithm>
 #include <array>
 
 // Clang doesn't seem to like constexpr std::array
@@ -9,6 +8,9 @@
 #else
 #define ARRAY_CONSTEXPR constexpr
 #endif
+
+static constexpr usize register_mask = 0xF;
+static constexpr usize imm_mask = 0xFF;
 
 static ARRAY_CONSTEXPR std::array instruction_to_string = {
     "ldr",
@@ -29,87 +31,126 @@ static ARRAY_CONSTEXPR std::array instruction_to_string = {
     "done",
 };
 
-static ARRAY_CONSTEXPR std::array no_reg_instructions = {
-    InstructionType::Done
+enum class InstructionGroup {
+    NoReg,
+    SingleReg,
+    DoubleReg,
+    TripleReg,
+    RegImm,
+    Unknown
 };
 
-static ARRAY_CONSTEXPR std::array single_reg_instructions = {
-    InstructionType::Push,
-    InstructionType::Pop
-};
+constexpr auto get_instruction_group(InstructionType type) -> InstructionGroup {
+    switch (type) {
+    case InstructionType::Done:
+        return InstructionGroup::NoReg;
+    case InstructionType::Push:
+    case InstructionType::Pop:
+        return InstructionGroup::SingleReg;
+    case InstructionType::Jump:
+    case InstructionType::JumpIfZero:
+    case InstructionType::LoadFromReg:
+        return InstructionGroup::DoubleReg;
+    case InstructionType::Add:
+    case InstructionType::And:
+    case InstructionType::Div:
+    case InstructionType::LoadFromMem:
+    case InstructionType::Mul:
+    case InstructionType::Or:
+    case InstructionType::Store:
+    case InstructionType::Sub:
+    case InstructionType::Xor:
+        return InstructionGroup::TripleReg;
+    case InstructionType::LoadFromImm:
+        return InstructionGroup::RegImm;
+    default:
+        return InstructionGroup::Unknown;
+    }
+}
 
-static ARRAY_CONSTEXPR std::array double_reg_instructions = {
-    InstructionType::Jump,
-    InstructionType::JumpIfZero,
-    InstructionType::LoadFromReg
-};
+bool validate_empty_registers(ProcessorSpec::insr_t instruction, i32 expected_registers) {
+    static constexpr usize max_registers = 3;
 
-static ARRAY_CONSTEXPR std::array triple_reg_instructions = {
-    InstructionType::Add,
-    InstructionType::And,
-    InstructionType::Div,
-    InstructionType::LoadFromMem,
-    InstructionType::Mul,
-    InstructionType::Or,
-    InstructionType::Store,
-    InstructionType::Sub,
-    InstructionType::Xor,
-};
+    if (expected_registers > max_registers)
+        return false;
 
-static ARRAY_CONSTEXPR std::array regimm_instructions = {
-    InstructionType::LoadFromImm
-};
-
-template <std::ranges::input_range R, typename T>
-bool range_contains(const R& range, const T& value) {
-    return std::ranges::any_of(
-        range,
-        [&](const auto& it) {
-            return it == value;
-        }
-    );
+    switch (expected_registers) {
+    case 1:
+        return (instruction & register_mask) == 0;
+    case 2:
+        return ((instruction >> 4) & register_mask) == 0 && (instruction & register_mask) == 0;
+    case 3:
+        return ((instruction >> 8) & register_mask) == 0 && ((instruction >> 4) & register_mask) == 0 && (instruction & register_mask) == 0;
+    default:
+        return true;
+    }
 }
 
 auto Disassembler::disassemble(std::span<const ProcessorSpec::insr_t> code) -> std::vector<std::string> {
-    if (code.empty())
-        return {};
+    std::vector<std::string> result;
 
-    auto result = std::vector<std::string> {};
     for (const auto instruction : code) {
-        const u8 mnemonic = static_cast<u8>((instruction >> 12) & 0xF);
-        const auto& mnemonic_string = instruction_to_string[mnemonic];
+        const auto mnemonic_index = static_cast<u8>((instruction >> 12) & register_mask);
+        const auto& mnemonic = instruction_to_string[mnemonic_index];
 
-        if (range_contains(no_reg_instructions, static_cast<InstructionType>(mnemonic))) {
-            result.emplace_back(mnemonic_string);
-            continue;
+        const auto instruction_type = static_cast<InstructionType>(mnemonic_index);
+        const auto group = get_instruction_group(instruction_type);
+
+        switch (group) {
+        case InstructionGroup::NoReg:
+            if (!validate_empty_registers(instruction, 3))
+                fmt::println(stderr, "Instruction '{}' expected no registers, potentially corrupt!", mnemonic);
+            else
+                result.emplace_back(mnemonic);
+            break;
+
+        case InstructionGroup::SingleReg: {
+            const auto r1 = (instruction >> 8) & register_mask;
+            if (r1 >= ProcessorSpec::register_count)
+                fmt::println(stderr, "Instruction '{}' addresses an invalid register", mnemonic);
+            else if (!validate_empty_registers(instruction, 2))
+                fmt::println(stderr, "Instruction '{}' expected 1 register, potentially corrupt!", mnemonic);
+            else
+                result.emplace_back(fmt::format("{} r{}", mnemonic, r1));
+            break;
         }
 
-        if (range_contains(single_reg_instructions, static_cast<InstructionType>(mnemonic))) {
-            const auto r1 = (instruction >> 8) & 0xF;
-            result.emplace_back(fmt::format("{} r{}", mnemonic_string, r1));
-            continue;
+        case InstructionGroup::DoubleReg: {
+            const auto r1 = (instruction >> 8) & register_mask;
+            const auto r2 = (instruction >> 4) & register_mask;
+            if (r1 >= ProcessorSpec::register_count || r2 >= ProcessorSpec::register_count)
+                fmt::println(stderr, "Instruction '{}' addresses an invalid register", mnemonic);
+            else if (!validate_empty_registers(instruction, 1))
+                fmt::println(stderr, "Instruction '{}' expected 2 registers, potentially corrupt!", mnemonic);
+            else
+                result.emplace_back(fmt::format("{} r{}, r{}", mnemonic, r1, r2));
+            break;
         }
 
-        if (range_contains(double_reg_instructions, static_cast<InstructionType>(mnemonic))) {
-            const auto r1 = (instruction >> 8) & 0xF;
-            const auto r2 = (instruction >> 4) & 0xF;
-            result.emplace_back(fmt::format("{} r{}, r{}", mnemonic_string, r1, r2));
-            continue;
+        case InstructionGroup::TripleReg: {
+            const auto r1 = (instruction >> 8) & register_mask;
+            const auto r2 = (instruction >> 4) & register_mask;
+            const auto r3 = instruction & register_mask;
+            if (r1 >= ProcessorSpec::register_count || r2 >= ProcessorSpec::register_count || r3 >= ProcessorSpec::register_count)
+                fmt::println(stderr, "Instruction '{}' addresses an invalid register", mnemonic);
+            else
+                result.emplace_back(fmt::format("{} r{}, r{}, r{}", mnemonic, r1, r2, r3));
+            break;
         }
 
-        if (range_contains(triple_reg_instructions, static_cast<InstructionType>(mnemonic))) {
-            const auto r1 = (instruction >> 8) & 0xF;
-            const auto r2 = (instruction >> 4) & 0xF;
-            const auto r3 = (instruction >> 0) & 0xF;
-            result.emplace_back(fmt::format("{} r{}, r{}, r{}", mnemonic_string, r1, r2, r3));
-            continue;
+        case InstructionGroup::RegImm: {
+            const auto r1 = (instruction >> 8) & register_mask;
+            const auto imm = instruction & imm_mask;
+            if (r1 >= ProcessorSpec::register_count)
+                fmt::println(stderr, "Instruction '{}' addresses an invalid register", mnemonic);
+            else
+                result.emplace_back(fmt::format("{} r{}, #{}", mnemonic, r1, imm));
+            break;
         }
 
-        if (range_contains(regimm_instructions, static_cast<InstructionType>(mnemonic))) {
-            const auto r1 = (instruction >> 8) & 0xF;
-            const auto imm = instruction & 0xFF;
-            result.emplace_back(fmt::format("{} r{}, #{}", mnemonic_string, r1, imm));
-            continue;
+        default:
+            fmt::println(stderr, "Encountered unknown instruction '{:b}'", instruction);
+            break;
         }
     }
 
