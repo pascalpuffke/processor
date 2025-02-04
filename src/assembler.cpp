@@ -18,7 +18,7 @@
  * loop:  sub r0, r0, r1
  *        jz done
  *        jp loop
- * done:  done
+ * done:  hlt
  *
  *
  * In this example, the assembler could replace the labels by offsets into the instruction stream based on the provided origin address
@@ -88,7 +88,7 @@ static std::unordered_map<std::string, InstructionDefinition> instruction_map = 
     { "add", { .type = InstructionType::Add, .args = InstructionArguments::TripleReg } },
     { "and", { .type = InstructionType::And, .args = InstructionArguments::TripleReg } },
     { "div", { .type = InstructionType::Div, .args = InstructionArguments::TripleReg } },
-    { "done", { .type = InstructionType::Done, .args = InstructionArguments::None } },
+    { "hlt", { .type = InstructionType::Halt, .args = InstructionArguments::None } },
     { "jp", { .type = InstructionType::Jump, .args = InstructionArguments::DoubleReg } },
     { "jz", { .type = InstructionType::JumpIfZero, .args = InstructionArguments::DoubleReg } },
     { "ldi", { .type = InstructionType::LoadFromImm, .args = InstructionArguments::RegImm } },

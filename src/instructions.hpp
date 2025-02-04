@@ -23,7 +23,7 @@ enum class InstructionType : u8 {
     Pop         = 0b1100,
     LoadFromImm = 0b1101,
     LoadFromMem = 0b1110,
-    Done        = 0b1111,
+    Halt        = 0b1111,
 };
 // clang-format on
 

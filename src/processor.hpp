@@ -24,7 +24,7 @@
  * and    <dst>,<lhs>,<rhs>
  *  or    <dst>,<lhs>,<rhs>
  * xor    <dst>,<lhs>,<rhs>
- * done                     set 'kill' bit and stop execution
+ * hlt                      set 'halt' flag, stopping execution on the next cycle
  */
 
 // Leak all of those out to whoever includes this file, I don't care anymore
@@ -37,10 +37,11 @@ using ProcessorSpec::addr_t;
 class Processor {
 public:
     enum class Flag : u8 {
-        Carry = 0b0001,
-        Zero = 0b0010,
-        Overflow = 0b0100,
-        Negative = 0b1000,
+        Carry = 0b00001,
+        Zero = 0b00010,
+        Overflow = 0b00100,
+        Negative = 0b01000,
+        Halt = 0b10000,
     };
 
     constexpr auto reset() {
@@ -98,7 +99,7 @@ public:
 
     [[nodiscard]] constexpr auto flag_string() const -> std::string {
         auto string = std::string {};
-        string.append("....");
+        string.append("...");
 
         if (is_flag_set(Flag::Negative))
             string.push_back('N');
@@ -117,6 +118,11 @@ public:
 
         if (is_flag_set(Flag::Carry))
             string.push_back('C');
+        else
+            string.push_back('.');
+
+        if (is_flag_set(Flag::Halt))
+            string.push_back('H');
         else
             string.push_back('.');
 
@@ -165,8 +171,10 @@ public:
 
     constexpr auto execute(usize instruction_count = std::numeric_limits<usize>::max()) -> bool {
         for (usize i = 0; i < instruction_count; i++) {
-            if (m_should_kill_itself)
+            if (is_flag_set(Flag::Halt)) {
+                fmt::println("halt flag set");
                 return false;
+            }
 
             if (m_program_counter == std::numeric_limits<decltype(m_program_counter)>::max()) {
                 fmt::println("reached end of memory");
@@ -212,7 +220,7 @@ public:
 
     constexpr auto decode_instruction(insr_t instruction) -> DecodedInstruction {
         if (instruction == 0)
-            m_should_kill_itself = true;
+            set_flag(Flag::Halt);
 
         // Always parse out all fields, no matter what the instruction actually requires.
         return DecodedInstruction {
@@ -280,7 +288,7 @@ public:
             auto& dst = m_registers[r1];
             auto& high_reg = m_registers[r2];
             auto& low_reg = m_registers[r3];
-            addr_t address = static_cast<addr_t>((high_reg << 8) | low_reg);
+            auto address = static_cast<addr_t>((high_reg << 8) | low_reg);
 
             dst = read_memory(address);
 
@@ -299,7 +307,7 @@ public:
             auto& high_reg = m_registers[r1];
             auto& low_reg = m_registers[r2];
             auto& src = m_registers[r3];
-            addr_t address = static_cast<addr_t>((high_reg << 8) | low_reg);
+            auto address = static_cast<addr_t>((high_reg << 8) | low_reg);
 
             write_memory(address, src);
 
@@ -505,8 +513,8 @@ public:
             dst = m_memory[m_stack_pointer];
             m_stack_pointer += sizeof(data_t);
         } break;
-        case InstructionType::Done: {
-            m_should_kill_itself = true;
+        case InstructionType::Halt: {
+            set_flag(Flag::Halt);
             return true;
         } break;
         default:
@@ -522,6 +530,4 @@ private:
     addr_t m_program_counter { 0 };
     addr_t m_stack_pointer { ProcessorSpec::stack_top_addr };
     u8 m_flags { 0 };
-
-    bool m_should_kill_itself { false };
 };

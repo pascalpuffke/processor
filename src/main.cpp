@@ -18,7 +18,7 @@ auto main(int, char**) -> int {
         sub r0, r0, r2
         jz r7, r5
         jp r7, r3
-        done
+        hlt
     )" };
 
     const auto code = Assembler::assemble(factorial);

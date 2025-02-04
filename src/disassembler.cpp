@@ -28,7 +28,7 @@ static ARRAY_CONSTEXPR std::array instruction_to_string = {
     "pop",
     "ldi",
     "ldm",
-    "done",
+    "hlt",
 };
 
 enum class InstructionGroup {
@@ -42,7 +42,7 @@ enum class InstructionGroup {
 
 constexpr auto get_instruction_group(InstructionType type) -> InstructionGroup {
     switch (type) {
-    case InstructionType::Done:
+    case InstructionType::Halt:
         return InstructionGroup::NoReg;
     case InstructionType::Push:
     case InstructionType::Pop:
