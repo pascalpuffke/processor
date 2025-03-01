@@ -26,7 +26,9 @@ auto main(int, char**) -> int {
     fmt::println("{}", disasm);
 
     constexpr auto start = ProcessorSpec::reset_pc;
-    for (const auto [i, instruction] : std::views::enumerate(code)) {
+
+    for (auto i = 0; i < code.size(); i++) {
+        const auto instruction = code[i];
         const auto location = static_cast<addr_t>(start + (i * 2));
         processor.write_instruction(location, instruction);
     }
