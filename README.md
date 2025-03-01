@@ -52,7 +52,7 @@ Full ISA:
  * and    <dst>,<lhs>,<rhs>
  *  or    <dst>,<lhs>,<rhs>
  * xor    <dst>,<lhs>,<rhs>
- * done                     set 'kill' bit and stop execution
+ * hlt                      set 'halt' flag, stopping execution on the next cycle
  */
 ```
 
